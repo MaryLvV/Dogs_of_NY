@@ -1,4 +1,6 @@
 setwd("C:/R_and_PowerBI")
+library(tidyverse)
+library(caret)
 
 #load our model and the new cases
 load('model_small.rda')
