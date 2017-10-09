@@ -17,7 +17,6 @@ NYC_dogs$upper_name <- toupper(NYC_dogs$dog_name)
 NYC_dogs$birth_date <- as.Date(gsub('-', '01', NYC_dogs$birth), format = '%b%d%y')
 NYC_dogs$age <- as.numeric((as.Date('2013-02-01') - NYC_dogs$birth_date)/365)
 
-
 #create factors for visualzing
 NYC_dogs$gender <- as.factor(NYC_dogs$gender)
 NYC_dogs$spayed_or_neutered <- as.factor(NYC_dogs$spayed_or_neutered)
@@ -42,7 +41,7 @@ boxplot(NYC_dogs$age)
 NYC_dogs$age <- ifelse(NYC_dogs$age < 0, median(NYC_dogs$age), NYC_dogs$age)
 NYC_dogs$age <- ifelse(NYC_dogs$age > 30, median(NYC_dogs$age), NYC_dogs$age)
 
-
+#how many dogs are trained as guard dogs?
 sum(NYC_dogs$guard_or_trained == 'Yes') #166
 
 missing_gender <- NYC_dogs %>% filter(is.na(gender))
@@ -109,27 +108,34 @@ ggplot(pop_names, aes(dog_name, count)) +
                                    hjust = 1))
 
 
+#uncomment the code in lines 116 - 132 the first time through to geocode zipcodes, 
+#bind them to the zipcode summary data, and then merge lat/lon pairs with the
+#main dataset; save these as .rda files so you can just load them as needed (lines 135-136)
+
 #summary by zipcode
 # by_zip <- NYC_dogs %>%
 #   group_by(zip_code) %>%
 #   summarise(count= n())
-# 
-# #google limits geocode requests to 2500 per day
-# #we look up each unique zipcode to get lat/lon and bind the results to our zipcode summary table
+
+#google limits geocode requests to 2500 per day
+#we look up each unique zipcode to get lat/lon and bind the results to our zipcode summary table
+
 # locations <-  geocode(as.character(by_zip$zip_code))
 # by_zip <- cbind(by_zip, locations)    #33 (out of 225) zipcodes not geocoded (15%)
-# 
-# #merge lon/lat pairs with our original data
+ 
+#merge lon/lat pairs with our original data
 # merge_loc <- by_zip %>% select(zip_code, lon, lat)
 # dogs_loc <- merge(NYC_dogs, merge_loc)
-# 
+
+#since geocoding takes a little time, we save these objects as .rda files
 # save(dogs_loc, file = 'NYC_dogs_with_location.rda')
 # save(by_zip, file = 'zipcode_summary.rda')
 
+#load the dogs_loc and by_zip data
 load('NYC_dogs_with_location.rda')
 load('zipcode_summary.rda')
 
-#nyc_map <- get_map("New York City", zoom = 10)
+#take a quick look at these on a map
 library(leaflet)
 dog_map <- leaflet() %>%
   addTiles() %>%
@@ -137,21 +143,22 @@ dog_map <- leaflet() %>%
 
 dog_map
 
-
+#you must un-comment and run the code in lines 151 - 175 the first time 
+#to build your model - then comment them out again and use the 3 load commands
 
 #set a seed value so we can repeat our random selection
 #divide the data randomly - 80% for training
 # set.seed(42)
 # 
 # #random selection rows of data for our training and test datasets
-# train <- sample(1:81472, 81472 * .80)
-# test <- setdiff(1:81472, train)
-# 
+# train <- sample(1:81462, 81462 * .80)
+# test <- setdiff(1:81462, train)
+
 # #use these selections to subset the data
 # train_data <- subset(dogs_loc[train, ])
 # test_data <- subset(dogs_loc[test, ])
-# 
-# #pull 5000 rows for our 'new' cases
+
+#pull 5000 rows for our (fabricated) 'new' cases
 # new <- sample(1:16295, 5000)
 # new_cases <- test_data[new, ]
 # test_data <- test_data[-new, ]
